@@ -95,6 +95,65 @@ body {
 			<div id="status-notice"></div>
 		</div>
 
+<script type="module">
+  import { DiscordSDK } from "https://cdn.jsdelivr.net/npm/@discord/embedded-app-sdk@latest/dist/index.mjs";
+
+  const CLIENT_ID = "1423225142892564511"; // Replace with your actual Discord application Client ID
+  const discordSdk = new DiscordSDK(CLIENT_ID);
+
+  // Bridge object for Godot to poll/call
+  window.discordBridge = {
+    _lastParticipantsJSON: "",
+    getLatestParticipants() {
+      const s = this._lastParticipantsJSON;
+      this._lastParticipantsJSON = ""; // Consume one-time
+      return s || "";
+    },
+
+    setActivityState(jsonString) {
+      try {
+        const payload = JSON.parse(jsonString);
+        discordSdk.commands.setActivity?.(payload).catch(e => console.warn("setActivity failed", e));
+      } catch (e) {
+        console.warn("setActivityState JSON parse failed", e);
+      }
+    },
+
+    async fetchParticipantsNow() {
+      try {
+        const r = await discordSdk.commands.getInstanceConnectedParticipants?.();
+        if (r) this._lastParticipantsJSON = JSON.stringify(r);
+      } catch (err) {
+        console.warn("fetchParticipantsNow error", err);
+      }
+    }
+  };
+
+  // Initialize the SDK and subscribe to participant updates
+  (async () => {
+    try {
+      await discordSdk.ready();
+      console.log("Discord SDK ready");
+
+      try {
+        const current = await discordSdk.commands.getInstanceConnectedParticipants?.();
+        if (current) window.discordBridge._lastParticipantsJSON = JSON.stringify(current);
+      } catch (e) {
+        console.warn("initial participants fetch failed", e);
+      }
+
+      discordSdk.subscribe("ACTIVITY_INSTANCE_PARTICIPANTS_UPDATE", (payload) => {
+        window.discordBridge._lastParticipantsJSON = JSON.stringify(payload);
+      });
+    } catch (e) {
+      console.error("Discord SDK init failed:", e);
+    }
+  })();
+</script>
+
+	
+
+		
 		<script src="Chameleon.js"></script>
 		<script>
 const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"ensureCrossOriginIsolationHeaders":true,"executable":"Chameleon","experimentalVK":false,"fileSizes":{"Chameleon.pck":11520,"Chameleon.wasm":35376909},"focusCanvas":true,"gdextensionLibs":[]};
