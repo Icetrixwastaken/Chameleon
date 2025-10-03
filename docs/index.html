@@ -76,8 +76,8 @@ body {
 	z-index: 1;
 }
 		</style>
-		<link id="-gd-engine-icon" rel="icon" type="image/png" href="Chameleon.icon.png" />
-<link rel="apple-touch-icon" href="Chameleon.apple-touch-icon.png"/>
+		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
+<link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
 
 	</head>
 	<body>
@@ -90,80 +90,14 @@ body {
 		</noscript>
 
 		<div id="status">
-			<img id="status-splash" src="Chameleon.png" alt="">
+			<img id="status-splash" src="index.png" alt="">
 			<progress id="status-progress"></progress>
 			<div id="status-notice"></div>
 		</div>
 
-<script type="module">
-  import { DiscordSDK } from "https://cdn.jsdelivr.net/npm/@discord/embedded-app-sdk@latest/dist/index.mjs";
-
-  const CLIENT_ID = "1423225142892564511"; // your app Client ID
-  const discordSdk = new DiscordSDK(CLIENT_ID);
-
-  window.discordBridge = {
-    _lastParticipantsJSON: "[]", // keep persistent
-    sdkReady: false,
-
-    // Return last known participants (do NOT clear)
-    getLatestParticipants() {
-      return this._lastParticipantsJSON;
-    },
-
-    // Set activity / shared state
-    setActivityState(jsonString) {
-      try {
-        const payload = JSON.parse(jsonString);
-        discordSdk.commands.setActivity?.(payload).catch(e => console.warn("setActivity failed", e));
-      } catch (e) {
-        console.warn("setActivityState JSON parse failed", e);
-      }
-    },
-
-    // Force fetch participants from SDK
-    async fetchParticipantsNow() {
-      if (!this.sdkReady) return;
-      try {
-        const r = await discordSdk.commands.getInstanceConnectedParticipants?.();
-        if (r) this._lastParticipantsJSON = JSON.stringify(r);
-      } catch (err) {
-        console.warn("fetchParticipantsNow error", err);
-      }
-    }
-  };
-
-  (async () => {
-    try {
-      await discordSdk.ready();
-      console.log("Discord SDK ready");
-      window.discordBridge.sdkReady = true;
-
-      // Initial fetch
-      try {
-        const current = await discordSdk.commands.getInstanceConnectedParticipants?.();
-        if (current) window.discordBridge._lastParticipantsJSON = JSON.stringify(current);
-      } catch (e) {
-        console.warn("initial fetch failed", e);
-      }
-
-      // Subscribe to participant updates
-      discordSdk.subscribe("ACTIVITY_INSTANCE_PARTICIPANTS_UPDATE", (payload) => {
-        console.log("Participants update:", payload);
-        window.discordBridge._lastParticipantsJSON = JSON.stringify(payload);
-      });
-    } catch (e) {
-      console.error("Discord SDK init failed:", e);
-    }
-  })();
-</script>
-
-
-	
-
-		
-		<script src="Chameleon.js"></script>
+		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"ensureCrossOriginIsolationHeaders":true,"executable":"Chameleon","experimentalVK":false,"fileSizes":{"Chameleon.pck":11520,"Chameleon.wasm":35376909},"focusCanvas":true,"gdextensionLibs":[]};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":11728,"index.wasm":35376909},"focusCanvas":true,"gdextensionLibs":[]};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
