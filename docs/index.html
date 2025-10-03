@@ -97,10 +97,9 @@ body {
 
 
 		<script type="module">
-  import { DiscordSDK } from 'https://cdn.skypack.dev/pin/@discord/embedded-app-sdk@v2.4.0-OjhXDwIoYzLOPRRZG20B/mode=imports,min/optimized/@discord/embedded-app-sdk.js';
+  import { DiscordSDK } from './discord-embedded-app-sdk.js';
 
-  const CLIENT_ID = "1423225142892564511";
-  const discordSdk = new DiscordSDK(CLIENT_ID);
+  const discordSdk = new DiscordSDK("1423225142892564511");
 
   window.discordBridge = {
     _lastParticipantsJSON: "",
