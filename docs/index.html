@@ -98,18 +98,19 @@ body {
 <script type="module">
   import { DiscordSDK } from "https://cdn.jsdelivr.net/npm/@discord/embedded-app-sdk@latest/dist/index.mjs";
 
-  const CLIENT_ID = "1423225142892564511"; // Replace with your actual Discord application Client ID
+  const CLIENT_ID = "1423225142892564511"; // your app Client ID
   const discordSdk = new DiscordSDK(CLIENT_ID);
 
-  // Bridge object for Godot to poll/call
   window.discordBridge = {
-    _lastParticipantsJSON: "",
+    _lastParticipantsJSON: "[]", // keep persistent
+    sdkReady: false,
+
+    // Return last known participants (do NOT clear)
     getLatestParticipants() {
-      const s = this._lastParticipantsJSON;
-      this._lastParticipantsJSON = ""; // Consume one-time
-      return s || "";
+      return this._lastParticipantsJSON;
     },
 
+    // Set activity / shared state
     setActivityState(jsonString) {
       try {
         const payload = JSON.parse(jsonString);
@@ -119,7 +120,9 @@ body {
       }
     },
 
+    // Force fetch participants from SDK
     async fetchParticipantsNow() {
+      if (!this.sdkReady) return;
       try {
         const r = await discordSdk.commands.getInstanceConnectedParticipants?.();
         if (r) this._lastParticipantsJSON = JSON.stringify(r);
@@ -129,20 +132,23 @@ body {
     }
   };
 
-  // Initialize the SDK and subscribe to participant updates
   (async () => {
     try {
       await discordSdk.ready();
       console.log("Discord SDK ready");
+      window.discordBridge.sdkReady = true;
 
+      // Initial fetch
       try {
         const current = await discordSdk.commands.getInstanceConnectedParticipants?.();
         if (current) window.discordBridge._lastParticipantsJSON = JSON.stringify(current);
       } catch (e) {
-        console.warn("initial participants fetch failed", e);
+        console.warn("initial fetch failed", e);
       }
 
+      // Subscribe to participant updates
       discordSdk.subscribe("ACTIVITY_INSTANCE_PARTICIPANTS_UPDATE", (payload) => {
+        console.log("Participants update:", payload);
         window.discordBridge._lastParticipantsJSON = JSON.stringify(payload);
       });
     } catch (e) {
@@ -150,6 +156,7 @@ body {
     }
   })();
 </script>
+
 
 	
 
