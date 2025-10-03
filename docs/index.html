@@ -95,6 +95,49 @@ body {
 			<div id="status-notice"></div>
 		</div>
 
+
+		<script type="module">
+  import { DiscordSDK } from 'https://cdn.skypack.dev/@discord/embedded-app-sdk';
+
+  const CLIENT_ID = "1423225142892564511";
+  const discordSdk = new DiscordSDK(CLIENT_ID);
+
+  window.discordBridge = {
+    _lastParticipantsJSON: "",
+    getLatestParticipants() {
+      const s = this._lastParticipantsJSON;
+      this._lastParticipantsJSON = "";
+      return s || "";
+    },
+    setActivityState(jsonString) {
+      try {
+        const payload = JSON.parse(jsonString);
+        discordSdk.commands.setActivity?.(payload).catch(e => console.warn("setActivity failed", e));
+      } catch(e) {
+        console.warn("setActivityState JSON parse failed", e);
+      }
+    },
+    async fetchParticipantsNow() {
+      try {
+        const r = await discordSdk.commands.getInstanceConnectedParticipants?.();
+        if (r) this._lastParticipantsJSON = JSON.stringify(r);
+      } catch(err) {
+        console.warn("fetchParticipantsNow error", err);
+      }
+    }
+  };
+
+  (async () => {
+    await discordSdk.ready();
+    const current = await discordSdk.commands.getInstanceConnectedParticipants?.();
+    if (current) window.discordBridge._lastParticipantsJSON = JSON.stringify(current);
+
+    discordSdk.subscribe("ACTIVITY_INSTANCE_PARTICIPANTS_UPDATE", (payload) => {
+      window.discordBridge._lastParticipantsJSON = JSON.stringify(payload);
+    });
+  })();
+</script>
+
 		<script src="index.js"></script>
 		<script>
 const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":11728,"index.wasm":35376909},"focusCanvas":true,"gdextensionLibs":[]};
